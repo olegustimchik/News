@@ -1,18 +1,21 @@
-import { Controller, Get, NotFoundException, Param, Post } from '@nestjs/common';
+import { Controller, Get, NotFoundException, Param, Query } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
 import { isUUID } from 'class-validator';
+
 import { NewsToItemById, NewsToListItem } from 'src/modules/main/interfaces/news';
+
+import { NewsListRequestDto } from 'src/modules/main/dto/request/newsList.dto';
 
 import { NewsService } from 'src/modules/main/services/news.service';
 
 @ApiTags('News')
 @Controller('news')
 export class NewsController {
-  constructor(private readonly projectService: NewsService) { }
+  constructor(private readonly newsService: NewsService) {}
 
   @Get('list')
-  async getList(): Promise<{ data: NewsToListItem[] }> {
-    return await this.projectService.getList();
+  async getList(@Query() query: NewsListRequestDto): Promise<{ data: NewsToListItem[] }> {
+    return await this.newsService.getList(query);
   }
 
   @Get('byId/:id')
@@ -20,8 +23,7 @@ export class NewsController {
     if (id && !isUUID(id)) {
       throw new NotFoundException();
     }
-    return await this.projectService.getItemById(id);
+
+    return await this.newsService.getItemById(id);
   }
-
-
 }

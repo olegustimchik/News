@@ -36,9 +36,7 @@ async function bootstrap(): Promise<void> {
 
   SwaggerModule.setup('swagger', app, document);
 
-  await app.listen(+process.env.PORT).then((value) => {
-    console.log("server is running on port " + process.env.PORT); 
-  });
+  await app.listen(+process.env.PORT);
 }
 
 bootstrap();
