@@ -1,6 +1,6 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Like, Raw } from 'typeorm';
+import { IsNull, Like, Not, Raw } from 'typeorm';
 import { Repository } from 'typeorm/repository/Repository';
 import { NewsToItemById, NewsToListItem } from 'src/modules/main/interfaces/news';
 import { NewsListRequestDto } from 'src/modules/main/dto/request/newsList.dto';
@@ -8,12 +8,14 @@ import { NewsEntity } from 'src/modules/main/entities/news.entity';
 import { NewsDataMapper } from 'src/modules/main/data-mappers/news.data-mapper';
 import { CategoryEntity } from '../entities/category.entity';
 import { CategoryTranslationEntity } from '../entities/categoryTranslation.entity';
+import { NewsToCategoryEntity } from '../entities/newsToCategory.entity';
 
 @Injectable()
 export class NewsService {
   constructor(
     private readonly newsDataMapper: NewsDataMapper,
-    @InjectRepository(NewsEntity) private newsRepository: Repository<NewsEntity>,
+    @InjectRepository(NewsEntity) private newsRepository: Repository<NewsEntity>, 
+    @InjectRepository(NewsToCategoryEntity) private newsToCategoryEntity: Repository<NewsToCategoryEntity>,
   ) { }
 
   async getList(query: NewsListRequestDto, language = 'English'): Promise<{ data: NewsToListItem[] }> {
@@ -29,33 +31,44 @@ export class NewsService {
     }
 
     const newsList = await this.newsRepository.find({
+      relations: { newsToCategories: true, newsTranslations: true },
       where: {
         isPublished: true,
         publishedAt: Raw(publishedAtRaw),
-        newsToCategories: {
-          category: {
-            categoryTranslations: {
-              language: language
+          newsToCategories: { 
+            category: {
+              categoryTranslations: {
+
+              }
             }
-          }
-        },
-        newsTranslations: [
-          {
-            language: language,
-            title: query?.searchTerm ? Like(`%${query.searchTerm}%`) : undefined,
           },
-          {
-            language: language,
-            description: query?.searchTerm ? Like(`%${query.searchTerm}%`) : undefined,
-          },
-        ],
+        //   newsTranslations: [
+        //     {
+        //       language: language,
+        //       title: query?.searchTerm ? Like(`%${query.searchTerm}%`) : undefined,
+        //     },
+        //     {
+        //       language: language,
+        //       description: query?.searchTerm ? Like(`%${query.searchTerm}%`) : undefined,
+        //     },
+        //   ],
       },
-      relations: { newsTranslations: true, newsToCategories: true },
+      relationLoadStrategy: "join",
     });
     console.log(newsList);
-    //const newsList = await this.newsRepository.createQueryBuilder("news").leftJoinAndSelect("news.categories", "categories");
+     const sql = await this.newsRepository.createQueryBuilder("news")
+     .leftJoinAndSelect("news.newsToCategories", "newsToCategory") // Assuming newsToCategories is the relation name in News entity
+     .leftJoinAndSelect("newsToCategory.category", "category") // Assuming category is the relation name in NewsToCategory entity
+     .leftJoinAndSelect("category.categoryTranslations", "categoryTranslation") // Assuming categoryTranslations is the relation name in Category entity
+     .where("categoryTranslation.language IS NOT NULL").getSql();// Filtering by non-null language
+    console.log(sql);
+     //  .getMany() // or getOne(), depending on your needs
+
+    //  .then(news => {
+    //      console.log(news);
+    //  });
     // return { data: newsList.map((news) => this.newsDataMapper.newsToSearchResult(news)) };
-     return { data: null }
+    return { data: null }
   }
 
   async withCategories() {

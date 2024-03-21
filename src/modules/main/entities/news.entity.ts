@@ -23,9 +23,9 @@ export class NewsEntity {
   @CreateDateColumn()
   createdAt: string;
 
-  @OneToMany(() => NewsTranslationEntity, (newsTranslation) => newsTranslation.news)
+  @OneToMany((type) => NewsTranslationEntity, (newsTranslation) => newsTranslation.news)
   newsTranslations: Relation<NewsTranslationEntity[]>;
 
-  @OneToMany(() => NewsToCategoryEntity, (newsToCategoryEntity) => newsToCategoryEntity.category)
+  @OneToMany((type) => NewsToCategoryEntity, (newsToCategoryEntity) => newsToCategoryEntity.news)
   newsToCategories: Relation<NewsToCategoryEntity[]>;
 }

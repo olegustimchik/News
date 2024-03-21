@@ -20,10 +20,11 @@ import { NewsController } from 'src/modules/main/controllers/news.controller';
 import { NewsService } from 'src/modules/main/services/news.service';
 
 import { NewsDataMapper } from 'src/modules/main/data-mappers/news.data-mapper';
+import { NewsToCategoryEntity } from './entities/newsToCategory.entity';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([NewsEntity, CategoryEntity, CategoryTranslationEntity, NewsTranslationEntity]),
+    TypeOrmModule.forFeature([NewsEntity, CategoryEntity, CategoryTranslationEntity, NewsTranslationEntity,  NewsToCategoryEntity]),
     ScheduleModule.forRoot(),
   ],
   controllers: [AppController, NewsController],
@@ -36,6 +37,7 @@ import { NewsDataMapper } from 'src/modules/main/data-mappers/news.data-mapper';
     NewsTranslationDataMapper,
     CategoryTranslationService,
     NewsTranslationService,
+   
   ],
 })
 export class MainModule {}

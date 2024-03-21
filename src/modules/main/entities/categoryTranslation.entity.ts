@@ -16,6 +16,6 @@ export class CategoryTranslationEntity {
   @CreateDateColumn()
   createdAt: string;
 
-  @ManyToOne(() => CategoryEntity, (category) => category.categoryTranslations)
+  @ManyToOne((type) => CategoryEntity, (category) => category.categoryTranslations)
   category: Relation<CategoryEntity>;
 }

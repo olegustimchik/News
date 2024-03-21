@@ -16,6 +16,6 @@ export class NewsTranslationEntity {
   @Column({ type: 'varchar', length: 50, nullable: false })
   language: string;
 
-  @ManyToOne(() => NewsEntity, (news) => news.newsTranslations)
+  @ManyToOne((type) => NewsEntity, (news) => news.newsTranslations)
   news: Relation<NewsEntity>;
 }

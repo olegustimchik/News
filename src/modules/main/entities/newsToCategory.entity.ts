@@ -1,16 +1,14 @@
 import {
     Column,
-    CreateDateColumn,
     Entity,
-    JoinTable,
+    JoinColumn,
     ManyToOne,
-    OneToMany,
     PrimaryGeneratedColumn,
     Relation,
 } from 'typeorm';
-
 import { CategoryEntity } from 'src/modules/main/entities/category.entity';
 import { NewsEntity } from 'src/modules/main/entities/news.entity';
+
 @Entity('newsToCategory')
 export class NewsToCategoryEntity {
     @PrimaryGeneratedColumn('uuid')
@@ -22,9 +20,11 @@ export class NewsToCategoryEntity {
     @Column({ type: "varchar"})
     categoryId: string;
 
-    @ManyToOne(() => CategoryEntity, (category) => category.newsToCategories)
-    category: CategoryEntity;
+    @ManyToOne((type) => CategoryEntity, (category) => category.newsToCategories)
+    @JoinColumn({name: "categoryId"})
+    category: Relation<CategoryEntity>;
 
-    @ManyToOne(() => NewsEntity, (news) => news.newsToCategories)
-    news: NewsEntity;
+    @ManyToOne((type) => NewsEntity, (news) => news.newsToCategories)
+    @JoinColumn({name: "newsId"})
+    news: Relation<NewsEntity>;
 } 
