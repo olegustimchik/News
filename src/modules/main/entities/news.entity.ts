@@ -2,15 +2,12 @@ import {
   Column,
   CreateDateColumn,
   Entity,
-  JoinTable,
-  ManyToMany,
   OneToMany,
   PrimaryGeneratedColumn,
   Relation,
 } from 'typeorm';
-
-import { CategoryEntity } from './category.entity';
-import { NewsTranslationEntity } from './newsTranslation.entity';
+import { NewsTranslationEntity } from 'src/modules/main/entities/newsTranslation.entity';
+import { NewsToCategoryEntity } from 'src/modules/main/entities/newsToCategory.entity';
 
 @Entity('news')
 export class NewsEntity {
@@ -29,7 +26,6 @@ export class NewsEntity {
   @OneToMany(() => NewsTranslationEntity, (newsTranslation) => newsTranslation.news)
   newsTranslations: Relation<NewsTranslationEntity[]>;
 
-  @ManyToMany(() => CategoryEntity)
-  @JoinTable()
-  categories: CategoryEntity[];
+  @OneToMany(() => NewsToCategoryEntity, (newsToCategoryEntity) => newsToCategoryEntity.category)
+  newsToCategories: Relation<NewsToCategoryEntity[]>;
 }

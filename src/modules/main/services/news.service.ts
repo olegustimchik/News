@@ -2,21 +2,19 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Like, Raw } from 'typeorm';
 import { Repository } from 'typeorm/repository/Repository';
-
 import { NewsToItemById, NewsToListItem } from 'src/modules/main/interfaces/news';
-
 import { NewsListRequestDto } from 'src/modules/main/dto/request/newsList.dto';
-
 import { NewsEntity } from 'src/modules/main/entities/news.entity';
-
 import { NewsDataMapper } from 'src/modules/main/data-mappers/news.data-mapper';
+import { CategoryEntity } from '../entities/category.entity';
+import { CategoryTranslationEntity } from '../entities/categoryTranslation.entity';
 
 @Injectable()
 export class NewsService {
   constructor(
     private readonly newsDataMapper: NewsDataMapper,
     @InjectRepository(NewsEntity) private newsRepository: Repository<NewsEntity>,
-  ) {}
+  ) { }
 
   async getList(query: NewsListRequestDto, language = 'English'): Promise<{ data: NewsToListItem[] }> {
     let publishedAtRaw = ``;
@@ -33,12 +31,14 @@ export class NewsService {
     const newsList = await this.newsRepository.find({
       where: {
         isPublished: true,
-        categories: {
-          categoryTranslations: {
-            language: language,
-          },
-        },
         publishedAt: Raw(publishedAtRaw),
+        newsToCategories: {
+          category: {
+            categoryTranslations: {
+              language: language
+            }
+          }
+        },
         newsTranslations: [
           {
             language: language,
@@ -50,13 +50,19 @@ export class NewsService {
           },
         ],
       },
-      relations: { categories: true, newsTranslations: true },
+      relations: { newsTranslations: true, newsToCategories: true },
     });
-
-    // const newsList = await this.newsRepository.createQueryBuilder("news").leftJoinAndSelect("news.categories", "categories");
-    return { data: newsList.map((news) => this.newsDataMapper.newsToSearchResult(news)) };
+    console.log(newsList);
+    //const newsList = await this.newsRepository.createQueryBuilder("news").leftJoinAndSelect("news.categories", "categories");
+    // return { data: newsList.map((news) => this.newsDataMapper.newsToSearchResult(news)) };
+     return { data: null }
   }
 
+  async withCategories() {
+    const news = await this.newsRepository.createQueryBuilder("news").innerJoin(CategoryEntity, "category").innerJoin(CategoryTranslationEntity, "translation", "translation.categoryId = category.id").printSql().getMany();
+
+    return news;
+  }
   async getItemById(id: string): Promise<{ data: NewsToItemById }> {
     const foundItem = await this.newsRepository.findOne({
       where: { id: id, isPublished: true },

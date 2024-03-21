@@ -1,13 +1,9 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-
 import { Category } from 'src/modules/main/interfaces/category';
-
 import { CategoryEntity } from 'src/modules/main/entities/category.entity';
-
 import { CategoryTranslationService } from 'src/modules/main/services/categoryTranslation.service';
-
 import { CategoryDataMapper } from 'src/modules/main/data-mappers/category.data-mapper';
 
 @Injectable()
